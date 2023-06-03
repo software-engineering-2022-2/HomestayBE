@@ -31,7 +31,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'polls.apps.PollsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,7 +49,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'helloworld.urls'
+ROOT_URLCONF = 'homestayrenting.urls'
 
 TEMPLATES = [
     {
@@ -68,22 +67,18 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'helloworld.wsgi.application'
+WSGI_APPLICATION = 'homestayrenting.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'sqlite': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pythonHelloWorld',
-        'USER': 'nvt',
-        'PASSWORD': '',
+        'NAME': 'homestay_db',
+        'USER': 'root',
+        'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
     }
