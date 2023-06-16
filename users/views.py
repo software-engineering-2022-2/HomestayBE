@@ -7,10 +7,12 @@ from .forms import UserRegistrationForm, UserLoginForm
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 
+
 class UserSignupView(CreateView):
     form_class = UserRegistrationForm
     template_name = 'users/signup.html'
     success_url = reverse_lazy('users:login')
+
 
 class UserLoginView(LoginView):
     form_class = UserLoginForm
@@ -18,6 +20,7 @@ class UserLoginView(LoginView):
 
     def get_success_url(self):
         return reverse_lazy('home')
+
 
 class UserLogoutView(View):
     def get(self, request):
