@@ -3,10 +3,6 @@ services:
     image: postgres
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=homestay
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000 --noreload
@@ -14,11 +10,5 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      - POSTGRES_NAME=homestay
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
-      - DJANGO_SECRET_KEY=django-insecure-tvmo(-q3s1sosis=fi+rqc4$31e2%3j_k2s2+g!712++!o36t9
-      - DJANGO_DEBUG=True
     depends_on:
       - db
