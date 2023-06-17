@@ -14,10 +14,10 @@ def endpoints(request):
     return Response(data)
 
 
-@permission_classes([IsAuthenticated, IsAdminUser])
+# @permission_classes([IsAuthenticated, IsAdminUser])
 class UserList(APIView):
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_superuser)
+    # def has_permission(self, request, view):
+        # return bool(request.user and request.user.is_superuser)
 
     def get(self, request):
         query = request.GET.get('query', '')
