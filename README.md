@@ -28,7 +28,7 @@ To run the Django web app locally with Docker, follow these steps:
 
    ```
    POSTGRES_DB=homestay
-POSPOSTGRES_USER=admin
+   POSTGRES_USER=admin
    POSTGRES_PASSWORD=admin
    POSTGRES_NAME=homestay
    POSTGRES_USER=admin
