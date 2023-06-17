@@ -57,17 +57,6 @@ To run the Django web app locally with Docker, follow these steps:
    ```
 4. Access the web app in your browser:
 
-   ```angular2html
+   ```
    http://0.0.0.0:8000
    ```
-## Configuration
-
-The web app uses environment variables to configure certain settings. You can modify the environment variables in the `docker-compose.yml` file to suit your needs. The default configuration includes the following variables:
-
-- `POSTGRES_NAME`: The name of the PostgreSQL database.
-- `POSTGRES_USER`: The username for the PostgreSQL database.
-- `POSTGRES_PASSWORD`: The password for the PostgreSQL database. 
-- `DJANGO_SECRET_KEY`: The application secret key
-- `DJANGO_DEBUG`: Option to run the application in the debugging mode
-
-You can customize these variables according to your preferences or specific requirements.
