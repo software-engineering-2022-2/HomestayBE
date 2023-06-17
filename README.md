@@ -55,6 +55,15 @@ To run the Django web app locally with Docker, follow these steps:
    ```shell
    docker compose up
    ```
+
+   In the first run, it might not work as the database is not yet created. If you run til the end and see the following message:
+   
+   ```
+   PostgreSQL is ready to accept connections
+   ```
+
+   Then restart the containers by running the previous command again and it will work.
+
 4. Access the web app in your browser:
 
    ```
