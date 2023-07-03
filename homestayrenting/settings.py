@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "corsheaders",
 
     'users.apps.UsersConfig',
+    'myadmin.apps.MyAdminConfig',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
