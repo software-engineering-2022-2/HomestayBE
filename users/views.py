@@ -48,6 +48,9 @@ class UserDetail(APIView):
         return get_object_or_404(User, username=username)
 
     def get(self, request, username):
+        if request.user.username != username and not request.user.is_superuser:
+            return Response(status=403)
+        
         user = self.get_object(username)
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)
