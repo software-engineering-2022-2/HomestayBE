@@ -68,6 +68,7 @@ class UserDetail(APIView):
         user.delete()
         return Response(status=204)
 
+
 @permission_classes([IsAuthenticated])
 class UserUpdateAvatar(APIView):
 

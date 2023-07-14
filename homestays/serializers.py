@@ -10,7 +10,8 @@ class HomestaySerializer(ModelSerializer):
 
     def validate_password(self, value: str) -> str:
         return make_password(value)
-    
+
+
 class ServiceSerializer(ModelSerializer):
     class Meta:
         model = Service

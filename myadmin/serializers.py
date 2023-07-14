@@ -7,6 +7,7 @@ class PricingConfigSerializer(ModelSerializer):
         model = PricingConfig
         fields = '__all__'
 
+
 class ServiceTypeSerializer(ModelSerializer):
     class Meta:
         model = ServiceType
