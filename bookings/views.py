@@ -86,11 +86,11 @@ class BookingDetail(APIView):
         # Remove the 'services' field from the data temporarily
         services_data = data.pop('services', [])
 
-        services = booking.services.all()
+        services_data = booking.services.all()
 
         # Print the services information
         print("Services Information:")
-        for service in services:
+        for service in services_data:
             print("Service ID:", service.id)
 
         # Update specific fields if they are present in the data
@@ -121,7 +121,7 @@ class BookingDetail(APIView):
             booking.review_timestamp = timezone.now()
 
         # Update the related services
-        service_ids = [service_data['id'] for service_data in services_data]
+        service_ids = [service_data.id for service_data in services_data]
         services = Service.objects.filter(id__in=service_ids)
         booking.services.set(services)
 
