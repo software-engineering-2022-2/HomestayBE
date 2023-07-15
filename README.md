@@ -28,8 +28,8 @@ To run the Django web app locally with Docker, follow these steps:
 
    ```
    DB_NAME=homestay
-   DB_USER=06ff1pb80clj48uxwmki
-   DB_PASSWORD=pscale_pw_xE8lHB8hdezASWc4vIhYdsgBHZ8EGBSVsFkmM35RSy6
+   DB_USER=a8vc95ph8eu90e0i54gl
+   DB_PASSWORD=pscale_pw_uV0mh9iewLUAiFYmDce7XDJzTbIvh9JBqnU5LTKHsq4
    DB_HOST=aws.connect.psdb.cloud
    DB_PORT=3306
    MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt

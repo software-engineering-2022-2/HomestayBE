@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Homestay, Service
-from .serializers import HomestaySerializer, ServiceSerializer
+from .serializers import HomestaySerializer, ServiceSerializer, ServiceGetSerializer
 from django.db.models import Q
+from myadmin.models import ServiceType
 
 
 @permission_classes([IsAuthenticatedOrReadOnly])
@@ -104,7 +105,9 @@ class ListServices(APIView):
     def get(self, request, homestay_id):
         homestay = get_object_or_404(Homestay, id=homestay_id)
         services = homestay.service_set.all()
-        serializer = ServiceSerializer(services, many=True)
+        for service in services:
+            service.service_type = get_object_or_404(ServiceType, id=service.service_type_id_id)
+        serializer = ServiceGetSerializer(services, many=True)
         return Response(serializer.data)
     
     def post(self, request, homestay_id):
