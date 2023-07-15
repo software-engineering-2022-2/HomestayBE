@@ -14,19 +14,47 @@ from django.db.models import Q
 
 
 class BookingList(APIView):
-    def get(self, request, username):
-        bookings = Booking.objects.filter(user__username=username)
-        serializer = BookingSerializer(bookings, many=True)
-        return Response(serializer.data)
+
+    def get(self, request, username=None):
+        # admin get all bookings
+        if request.user.is_superuser and request.user.is_staff and not username:
+            bookings = Booking.objects.all()
+            serializer = BookingSerializer(bookings, many=True)
+            return Response(serializer.data)
+
+        # homestay manager get all bookings of his homestays
+        if not request.user.is_superuser and request.user.is_staff and username:
+            bookings = Booking.objects.filter(homestay__manager_id=request.user)
+            serializer = BookingSerializer(bookings, many=True)
+            return Response(serializer.data)
+        
+        # customer get all his bookings
+        if not request.user.is_superuser and not request.user.is_staff and request.user.username == username:
+            bookings = Booking.objects.filter(user__username=username)
+            serializer = BookingSerializer(bookings, many=True)
+            return Response(serializer.data)
+
+        return HttpResponseBadRequest('You are not authorized to view this page.')
 
     def post(self, request, username):
         data = request.data
-        data['user'] = get_object_or_404(User, username=username).id
+        user = get_object_or_404(User, username=username)
+        data['user'] = user.id
+
+        # only customer can create booking
+        if user.is_staff or user.is_superuser:
+            return HttpResponseBadRequest('Only customer can create booking.')
+        
         service_ids = [service['id'] for service in data.get('services', [])]
 
-        # Check if the homestay is occupied
         checkin_date = data.get('checkin_date')
         checkout_date = data.get('checkout_date')
+        # check if the checkin date is before the checkout date
+        if checkin_date and checkout_date:
+            if checkin_date >= checkout_date:
+                return Response('Checkin date must be before checkout date.', status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if the homestay is occupied
         homestay_id = data.get('homestay')
         if checkin_date and checkout_date and homestay_id:
             existing_bookings = Booking.objects.filter(
@@ -63,6 +91,7 @@ class BookingList(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    # Not used
     def delete(self, request, username):
         user = get_object_or_404(User, username=username)
         bookings = Booking.objects.filter(user=user)
@@ -73,6 +102,10 @@ class BookingList(APIView):
 class BookingDetail(APIView):
     def get(self, request, username, booking_id):
         booking = get_object_or_404(Booking, user__username=username, id=booking_id)
+        # only booked user, homestay's manager and admin can view the booking
+        if not (request.user == booking.user or request.user == booking.homestay.manager_id or request.user.is_superuser):
+            return HttpResponseBadRequest('You are not authorized to view this booking.')
+
         serializer = BookingSerializer(booking)
         return Response(serializer.data)
 
