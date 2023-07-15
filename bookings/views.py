@@ -1,5 +1,5 @@
 from django.utils import timezone
-
+from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -35,7 +35,8 @@ class BookingList(APIView):
             )
 
             if existing_bookings.exists():
-                return Response('The homestay is already occupied during the selected dates.', status=status.HTTP_400_BAD_REQUEST)
+                return Response('The homestay is already occupied during the selected dates.',
+                                status=status.HTTP_400_BAD_REQUEST)
 
         # Check maximum adults and maximum children
         num_adults = data.get('num_adults', 0)
@@ -72,51 +73,67 @@ class BookingList(APIView):
 
 class BookingDetail(APIView):
     def get(self, request, username, booking_id):
-        booking = get_object_or_404(Booking, user__username=username, id=booking_id)
+        user = get_object_or_404(User, username=username)
+        booking = get_object_or_404(Booking, user=user, id=booking_id)
         serializer = BookingSerializer(booking)
         return Response(serializer.data)
 
-    def patch(self, request, username, booking_id):
-        booking = get_object_or_404(Booking, user__username=username, id=booking_id)
+    def put(self, request, username, booking_id):
+        user = get_object_or_404(User, username=username)
+        booking = get_object_or_404(Booking, user=user, id=booking_id)
         data = request.data
-        data['user'] = booking.user.id
 
-        # Extract only the allowed fields from the data
-        allowed_fields = ['comment', 'rating', 'status']
-        validated_data = {field: data.get(field) for field in allowed_fields}
+        # Remove the 'services' field from the data temporarily
+        services_data = data.pop('services', [])
 
-        serializer = BookingSerializer(booking, data=validated_data, partial=True)
-        if serializer.is_valid():
-            updated_booking = serializer.save()
+        services = booking.services.all()
 
-            # Update specific fields if they are present in validated_data
-            if 'status' in validated_data and booking.status != validated_data['status']:
-                updated_booking.status = validated_data['status']
+        # Print the services information
+        print("Services Information:")
+        for service in services:
+            print("Service ID:", service.id)
 
-                if booking.status != "Canceled" and validated_data['status'] == "Canceled":
-                    updated_booking.canceled_at = timezone.now()
+        # Update specific fields if they are present in the data
+        if 'status' in data and booking.status != data['status']:
+            print(booking.status, data['status'])
 
-                    homestay = Homestay.objects.get(id=updated_booking.homestay.id)
-                    homestay_price_config = PricingConfig.objects.get(id=homestay.pricing_config_id_id)
+            if booking.status != "Canceled" and data['status'] == "Canceled":
+                booking.canceled_at = timezone.now()
 
-                    if (updated_booking.canceled_at.date() - updated_booking.checkin_date).days > homestay_price_config.free_cancellation_days:
-                        updated_booking.refund_price = updated_booking.total_price * homestay_price_config.cancellation_refund_percentage
-                    else:
-                        updated_booking.refund_price = updated_booking.total_price
+                homestay = Homestay.objects.get(id=booking.homestay.id)
+                homestay_price_config = PricingConfig.objects.get(id=homestay.pricing_config_id_id)
 
-            if 'comment' in validated_data:
-                updated_booking.comment = validated_data['comment']
-                updated_booking.review_timestamp = timezone.now()
-            if 'rating' in validated_data:
-                updated_booking.rating = validated_data['rating']
-                updated_booking.review_timestamp = timezone.now()
+                print(booking.canceled_at.date(), booking.checkin_date, homestay_price_config.free_cancellation_days)
+                cancel_days = (booking.checkin_date - booking.canceled_at.date()).days
+                print(cancel_days)
+                if cancel_days < homestay_price_config.free_cancellation_days:
+                    booking.refund_price = booking.total_price * homestay_price_config.cancellation_refund_percentage
+                else:
+                    booking.refund_price = booking.total_price
 
-            updated_booking.save()
+            booking.status = data['status']
 
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if 'comment' in data:
+            booking.comment = data['comment']
+            booking.review_timestamp = timezone.now()
+        if 'rating' in data:
+            booking.rating = data['rating']
+            booking.review_timestamp = timezone.now()
+
+        # Update the related services
+        service_ids = [service_data['id'] for service_data in services_data]
+        services = Service.objects.filter(id__in=service_ids)
+        booking.services.set(services)
+
+        # Save the booking object
+        booking.save()
+
+        serializer = BookingSerializer(booking)
+
+        return Response(serializer.data)
 
     def delete(self, request, username, booking_id):
-        booking = get_object_or_404(Booking, user__username=username, id=booking_id)
+        user = get_object_or_404(User, username=username)
+        booking = get_object_or_404(Booking, user=user, id=booking_id)
         booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
