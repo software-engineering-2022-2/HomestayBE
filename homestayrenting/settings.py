@@ -15,6 +15,11 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+
 load_dotenv()
 
 
@@ -152,3 +157,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# Set up cloudinary config for uploading image
+cloudinary.config( 
+  cloud_name = "dp9km8tmk", 
+  api_key = "649821629756593", 
+  api_secret = "KoF4eTbX-cr9o7_Pc77_W3ro1MQ" 
+)
