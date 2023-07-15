@@ -213,17 +213,14 @@ def generate_homestays(cities, streets, manager_ids, config_ids, headers, num_ho
     with open('data_generation/utils_data/homestay_descriptions.txt', 'r') as f:
         descriptions = f.readlines()
     
-    # fetch full avatar urls from cloudinary
-    resources = cloudinary.api.resources(type = 'upload', prefix = "homestay-renting-website/homestays", max_results = 500)
-    urls = []
-    for resource in resources['resources']:
-        url = cloudinary.utils.cloudinary_url(resource['public_id'])
-        urls.append(url[0])
+    # fetch images and prices from json file
+    with open("data_generation/utils_data/homestay_img_price.json", "r") as output_file:
+        img_price_list = json.load(output_file)
 
     homestays = []
     for i in range(num_homestays):
         name = generate_homestay_name()
-        price = round(random.uniform(20.0, 300.0), 2)
+        price = img_price_list[i]['price']
         description = random.choice(descriptions)
         max_num_adults = random.randint(1, 10)
         max_num_children = random.randint(1, 10)
@@ -235,7 +232,7 @@ def generate_homestays(cities, streets, manager_ids, config_ids, headers, num_ho
         street_number = random.randint(1, 999)
         manager_id = random.choice(manager_ids)
         pricing_config_id = random.choice(config_ids)
-        image = random.choice(urls)
+        image = img_price_list[i]['img'][0]
 
         homestay = {
             "name": name,
@@ -420,8 +417,8 @@ def generate_homestay_services(homestay_ids, service_types, headers):
 # -----------------------------
 
 cities, streets = prepare()
-manager_ids = generate_users(cities, streets, login_admin(), 80, 20)
+manager_ids = generate_users(cities, streets, login_admin(), 1, 2)
 config_ids = generate_price_configs(login_admin(), 15)
-homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login_admin(), 100)
+homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login_admin(), 5)
 service_types = generate_service_types(login_admin())
 generate_homestay_services(homestay_ids, service_types, login_admin())
