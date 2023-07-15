@@ -52,8 +52,29 @@ class HomestayDetail(APIView):
 
     def get(self, request, homestay_id):
         homestay = self.get_object(homestay_id)
+        bookings = homestay.booking_set.all()
+
+        reviews = []
+        for booking in bookings:
+            if booking.comment and booking.rating and booking.review_timestamp:
+                reviews.append({
+                    'comment': booking.comment,
+                    'rating': booking.rating,
+                    'review_timestamp': booking.review_timestamp,
+                    'user': {
+                        'first_name': booking.user.first_name,
+                        'last_name': booking.user.last_name,
+                    }
+                })
+        reviews.sort(key=lambda x: x['review_timestamp'], reverse=True)
+        avg_rating = None if len(reviews) == 0 else sum(int(review['rating']) for review in reviews) / len(reviews)
+
         serializer = HomestaySerializer(homestay)
-        return Response(serializer.data)
+        data = serializer.data
+        data['reviews'] = reviews
+        data['avg_rating'] = avg_rating
+
+        return Response(data)
 
     def put(self, request, homestay_id):
         # Only admin and homestay manager can update homestays

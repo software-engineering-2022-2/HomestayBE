@@ -11,8 +11,12 @@ from .serializers import BookingSerializer
 from users.models import User
 from django.http import HttpResponseBadRequest
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from datetime import datetime
 
 
+@permission_classes([IsAuthenticated])
 class BookingList(APIView):
 
     def get(self, request, username=None):
@@ -49,11 +53,16 @@ class BookingList(APIView):
 
         checkin_date = data.get('checkin_date')
         checkout_date = data.get('checkout_date')
-        # check if the checkin date is before the checkout date
+
+        # check valid checkin_date and checkout_date
         if checkin_date and checkout_date:
-            if checkin_date >= checkout_date:
-                return Response('Checkin date must be before checkout date.', status=status.HTTP_400_BAD_REQUEST)
-        
+            checkin_date_dt = datetime.strptime(checkin_date, '%Y-%m-%d')
+            checkout_date_dt = datetime.strptime(checkout_date, '%Y-%m-%d')
+            if checkin_date_dt >= checkout_date_dt:
+                return HttpResponseBadRequest('Checkout date must be later than checkin date.')
+            if checkin_date_dt < datetime.now():
+                return HttpResponseBadRequest('Checkin date must be later than today.')
+            
         # Check if the homestay is occupied
         homestay_id = data.get('homestay')
         if checkin_date and checkout_date and homestay_id:
