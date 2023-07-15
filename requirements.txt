@@ -1,5 +1,4 @@
 Django==4.2.2
-psycopg2==2.9.6
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 python-dotenv==1.0.0
@@ -8,3 +7,5 @@ faker
 requests
 tqdm
 cloudinary==1.26.0
+mysqlclient==2.2.0
+PyMySQL

@@ -1,10 +1,4 @@
 services:
-  db:
-    image: postgres
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
-    env_file:
-      - .env
   web:
     env_file:
       - .env
@@ -16,5 +10,3 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    depends_on:
-      - db

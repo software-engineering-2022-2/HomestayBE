@@ -417,8 +417,8 @@ def generate_homestay_services(homestay_ids, service_types, headers):
 # -----------------------------
 
 cities, streets = prepare()
-manager_ids = generate_users(cities, streets, login_admin(), 1, 2)
+manager_ids = generate_users(cities, streets, login_admin(), 200, 50)
 config_ids = generate_price_configs(login_admin(), 15)
-homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login_admin(), 5)
+homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login_admin(), 120)
 service_types = generate_service_types(login_admin())
 generate_homestay_services(homestay_ids, service_types, login_admin())
