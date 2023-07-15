@@ -1,7 +1,7 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractUser
-
+from cloudinary.models import CloudinaryField
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -11,5 +11,5 @@ class User(AbstractUser):
     street_number = models.CharField(max_length=10, blank=True, null=True)
     district = models.CharField(max_length=100, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
-    avatar = models.CharField(max_length=100, blank=True, null=True)
+    avatar = CloudinaryField('image', blank=True, null=True)
     email = models.EmailField(unique=True, null=True)

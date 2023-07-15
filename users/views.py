@@ -7,6 +7,7 @@ from .models import User
 from .serializers import UserSerializer, ImageSerializer, UserProfileSerializer, UserPasswordSerializer
 from django.db.models import Q
 from django.core.files.storage import default_storage
+from cloudinary.models import CloudinaryResource
 
 
 @api_view(['GET'])
@@ -67,6 +68,21 @@ class UserDetail(APIView):
         user = self.get_object(username)
         user.delete()
         return Response(status=204)
+
+class ManagerProfile(APIView):
+    def get_object(self, id):
+        return get_object_or_404(User, id=id)
+
+    def get(self, request, id):
+        manager = self.get_object(id)
+        serializer = UserProfileSerializer(manager)
+        data = {
+            "first_name": serializer.data["first_name"],
+            "last_name": serializer.data["last_name"],
+            "avatar": serializer.data["avatar"],
+            "number_of_homestays": manager.homestay_set.count()
+        }
+        return Response(data)
 
 
 @permission_classes([IsAuthenticated])

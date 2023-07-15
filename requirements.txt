@@ -7,3 +7,4 @@ django-cors-headers==4.1.0
 faker
 requests
 tqdm
+cloudinary==1.26.0
