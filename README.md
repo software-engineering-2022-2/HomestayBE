@@ -27,12 +27,12 @@ To run the Django web app locally with Docker, follow these steps:
    Create a `.env` file. You can copy the content of the .env.example file into the `.env` file. The content might look like this:
 
    ```
-   POSTGRES_DB=homestay
-   POSTGRES_USER=admin
-   POSTGRES_PASSWORD=admin
-   POSTGRES_NAME=homestay
-   POSTGRES_USER=admin
-   POSTGRES_PASSWORD=admin
+   DB_NAME=homestay
+   DB_USER=06ff1pb80clj48uxwmki
+   DB_PASSWORD=pscale_pw_xE8lHB8hdezASWc4vIhYdsgBHZ8EGBSVsFkmM35RSy6
+   DB_HOST=aws.connect.psdb.cloud
+   DB_PORT=3306
+   MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
    DJANGO_SECRET_KEY=django-insecure-tvmo(-q3s1sosis=fi+rqc4$31e2%3j_k2s2+g!712++!o36t9
    DJANGO_DEBUG=True
    ```
@@ -44,22 +44,16 @@ To run the Django web app locally with Docker, follow these steps:
    docker rmi <image_name>
    ```
 
-   Create a `data/db` directory inside the container. This will keep the data even when you restart the containers. Docker will also need permissions for writting to the `data` directory for storing the database. To do that, run:
-
-   ```
-   sudo chown $USER:$USER HomestayBE/data/db
-   ```
-
 3. Start the containers:
 
    ```shell
    docker compose up
    ```
 
-   In the first run, it might not work as the database is not yet created. If you run til the end and see the following message:
-   
+   In the first run, it might not work as the database is not yet created. You should manually create the database by running the following command:
+
    ```
-   PostgreSQL is ready to accept connections
+   docker exec -it <container_name> python manage.py migrate
    ```
 
    Then restart the containers by running the previous command again and it will work.
