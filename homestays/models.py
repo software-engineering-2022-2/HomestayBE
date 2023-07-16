@@ -5,9 +5,8 @@ import uuid
 
 
 class Homestay(models.Model):
-
     id = models.UUIDField(primary_key=True, max_length=20, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length= 100)
+    name = models.CharField(max_length=100)
     price = models.FloatField()
     description = models.TextField()
     max_num_adults = models.IntegerField()
@@ -25,8 +24,8 @@ class Homestay(models.Model):
     def __str__(self):
         return self.name
 
-class Service(models.Model):
 
+class Service(models.Model):
     price = models.FloatField()
     description = models.TextField()
     availability = models.BooleanField()

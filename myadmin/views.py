@@ -9,7 +9,7 @@ from .models import PricingConfig, ServiceType
 from .serializers import PricingConfigSerializer, ServiceTypeSerializer
 
 
-@permission_classes([IsAdminUser])
+# @permission_classes([IsAdminUser])
 class PricingConfigList(APIView):
     
     def get(self, request):

@@ -84,6 +84,7 @@ class ManagerProfile(APIView):
         }
         return Response(data)
 
+
 @permission_classes([IsAuthenticated])
 class UserUpdateAvatar(APIView):
 

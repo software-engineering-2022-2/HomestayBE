@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'myadmin.apps.MyAdminConfig',
     'homestays.apps.HomestaysConfig',
+    'bookings.apps.BookingsConfig',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -63,7 +64,7 @@ REST_FRAMEWORK = {
 
 # Django project settings.py
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
@@ -107,12 +108,17 @@ WSGI_APPLICATION = 'homestayrenting.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_NAME', 'homestay'),
-        'USER': os.getenv('POSTGRES_USER', 'admin'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'admin'),
-        'HOST': os.getenv('DB_HOST', 'db'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'ENGINE': 'django_psdb_engine',
+        'NAME': os.environ.get('DB_NAME', 'homestay'),
+        'USER': os.environ.get('DB_USER', 'fg6of65vl16lt3qwcers'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'pscale_pw_sOMOa299eSoIoEG6UuMJ2c6g45eHiJPg66nVITLRZXN'),
+        'HOST': os.environ.get('DB_HOST', 'aws.connect.psdb.cloud'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+        'OPTIONS': {
+            'ssl': {'ca': os.environ.get('MYSQL_ATTR_SSL_CA')},
+            'charset': 'utf8mb4',
+            'init_command': 'SET default_storage_engine=INNODB',
+            }
     }
 }
 
@@ -159,8 +165,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Set up cloudinary config for uploading image
-cloudinary.config( 
-  cloud_name = "dp9km8tmk", 
-  api_key = "649821629756593", 
-  api_secret = "KoF4eTbX-cr9o7_Pc77_W3ro1MQ" 
+cloudinary.config(
+    cloud_name="dp9km8tmk",
+    api_key="649821629756593",
+    api_secret="KoF4eTbX-cr9o7_Pc77_W3ro1MQ"
 )
