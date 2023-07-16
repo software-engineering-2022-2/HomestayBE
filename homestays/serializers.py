@@ -22,4 +22,4 @@ class ServiceGetSerializer(ModelSerializer):
     service_type = ServiceTypeSerializer(read_only = True)
     class Meta:
         model = Service
-        fields = ['price', 'description', 'availability', 'service_type_id', 'service_type', 'homestay_id']
+        fields = ['id', 'price', 'description', 'availability', 'service_type_id', 'service_type', 'homestay_id']
