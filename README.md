@@ -27,15 +27,16 @@ To run the Django web app locally with Docker, follow these steps:
    Create a `.env` file. You can copy the content of the .env.example file into the `.env` file. The content might look like this:
 
    ```
-   DB_NAME=homestay
-   DB_USER=a8vc95ph8eu90e0i54gl
-   DB_PASSWORD=pscale_pw_uV0mh9iewLUAiFYmDce7XDJzTbIvh9JBqnU5LTKHsq4
-   DB_HOST=aws.connect.psdb.cloud
-   DB_PORT=3306
+   DB_NAME=<database_name>
+   DB_USER=<database_user>
+   DB_PASSWORD=<database_password>
+   DB_HOST=<database_host>
+   DB_PORT=<database_port>
    MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
-   DJANGO_SECRET_KEY=django-insecure-tvmo(-q3s1sosis=fi+rqc4$31e2%3j_k2s2+g!712++!o36t9
+   DJANGO_SECRET_KEY=<django_secret_key>
    DJANGO_DEBUG=True
    ```
+   Note: The MYSQL_ATTR_SSL_CA depends on your system. You can find the path by following the steps in this [link](https://planetscale.com/docs/concepts/secure-connections?fbclid=IwAR3N3Bie9sye36NEcZJYVJ0CvaEYolOZ-n-e7qxB2EaIPxtnw__7eUGIIo8).
 
    Remove all the images and containers related to the project to start a fresh download. This will prevent docker from using the older images.
 
