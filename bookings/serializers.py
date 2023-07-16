@@ -29,11 +29,6 @@ class BookingSerializer(ModelSerializer):
             except KeyError:
                 print(f"Missing 'id' key in service_data: {service_data}")
 
-        services = Service.objects.filter(id__in=service_ids)
-        booking.services.set(services)
-
-        booking.update_total_deposit_price()
-
         return booking
 
     def update(self, instance, validated_data):

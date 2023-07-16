@@ -6,6 +6,6 @@ django-cors-headers==4.1.0
 faker
 requests
 tqdm
-cloudinary==1.26.0
+cloudinary==1.33.0
 mysqlclient==2.2.0
 PyMySQL

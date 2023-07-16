@@ -95,6 +95,7 @@ class BookingList(APIView):
             # Add services to the booking
             services = Service.objects.filter(id__in=service_ids)
             booking.services.set(services)
+            booking.update_total_deposit_price()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 

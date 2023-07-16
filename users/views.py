@@ -8,6 +8,9 @@ from .serializers import UserSerializer, ImageSerializer, UserProfileSerializer,
 from django.db.models import Q
 from django.core.files.storage import default_storage
 from cloudinary.models import CloudinaryResource
+from cloudinary.uploader import upload, destroy
+from cloudinary.utils import cloudinary_url
+import cloudinary
 
 
 @api_view(['GET'])
@@ -89,28 +92,29 @@ class ManagerProfile(APIView):
 class UserUpdateAvatar(APIView):
 
     def put(self, request, username):
-        serializer = ImageSerializer(data = request.data)
+        serializer = ImageSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
-        
+
         user = get_object_or_404(User, username=username)
 
-        if user.avatar and default_storage.exists(user.avatar):
-            default_storage.delete(user.avatar)
+        # Remove old avatar if it exists
+        if user.avatar:
+            public_id = user.avatar.public_id
+            destroy(public_id)
 
+        # Upload new avatar
         image = serializer.validated_data.get('image')
-        image_path = default_storage.save(image.name, image)
-        data = {
-            "username": username,
-            "avatar": image_path
-        }
-        userSerializer = UserProfileSerializer(user, data=data)
+        upload_result = upload(image, folder='homestay-renting-website/user_avatars')
+        url, options = cloudinary_url(upload_result['public_id'],
+                                      format=upload_result['format'])
+        userSerializer = UserProfileSerializer(user, data={"avatar": url}, partial=True)
         if not userSerializer.is_valid():
             return Response(userSerializer.errors, status=400)
         userSerializer.save()
 
-        return Response(userSerializer.data, status=200)  
-    
+        return Response(userSerializer.data, status=200)
+
 @permission_classes([IsAuthenticated])
 class UserUpdatePassword(APIView):
     

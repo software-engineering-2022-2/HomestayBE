@@ -5,6 +5,7 @@ from homestays.models import Service, Homestay
 from myadmin.models import PricingConfig
 from django.core.exceptions import ValidationError
 from users.models import User
+import datetime
 
 
 # PENDING = 'Pending'
@@ -35,7 +36,9 @@ class Booking(models.Model):
         homestay = Homestay.objects.get(id=self.homestay.id)
         homestay_price = homestay.price
         homestay_price_config = PricingConfig.objects.get(id=homestay.pricing_config_id_id)
-        total_price = homestay_price + sum(service.price for service in self.services.all())
+        checkin_date_dt = datetime.datetime.strptime(str(self.checkin_date), '%Y-%m-%d')
+        checkout_date_dt = datetime.datetime.strptime(str(self.checkout_date), '%Y-%m-%d')
+        total_price = homestay_price*(checkin_date_dt - checkout_date_dt).days + sum(service.price for service in self.services.all())
         if homestay_price_config.discount > 0:
             total_price = total_price * (1 - homestay_price_config.discount)
         self.total_price = total_price
