@@ -109,11 +109,11 @@ WSGI_APPLICATION = 'homestayrenting.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_psdb_engine',
-        'NAME': os.environ.get('DB_NAME', 'homestay'),
-        'USER': os.environ.get('DB_USER', 'fg6of65vl16lt3qwcers'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'pscale_pw_sOMOa299eSoIoEG6UuMJ2c6g45eHiJPg66nVITLRZXN'),
-        'HOST': os.environ.get('DB_HOST', 'aws.connect.psdb.cloud'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
         'OPTIONS': {
             'ssl': {'ca': os.environ.get('MYSQL_ATTR_SSL_CA')},
             'charset': 'utf8mb4',

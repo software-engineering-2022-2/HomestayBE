@@ -6,6 +6,8 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from tqdm import tqdm
+from datetime import timedelta
+import datetime
 
 cloudinary.config( 
   cloud_name = "dp9km8tmk", 
@@ -13,9 +15,9 @@ cloudinary.config(
   api_secret = "KoF4eTbX-cr9o7_Pc77_W3ro1MQ" 
 )
 
-def login_admin():
+def login(username='admin', password='123456'):
     url = 'http://127.0.0.1:8000/api/token/'
-    login_data = {'username': 'admin', 'password': '123456'}
+    login_data = {'username': username, 'password': password}
     response = requests.post(url, data=json.dumps(login_data), headers={'Content-Type': 'application/json'})
     token = response.json()['access']
 
@@ -413,12 +415,114 @@ def generate_homestay_services(homestay_ids, service_types, headers):
             if response.status_code != 201:
                 print('Error sending data for homestay service:', service, response.text)
 
+def generate_bookings(headers, num_bookings=100):
+    # get all homestays
+    print('Getting homestays...')
+    url = 'http://localhost:8000/api/homestays/'
+    response = requests.get(url, headers=headers)
+    homestays = response.json()
+
+    # get all users
+    print('Getting users...')
+    url = 'http://localhost:8000/api/users/'
+    response = requests.get(url, headers=headers)
+    users = response.json()
+
+    # create a list of random comment and rating
+    reviews = [
+        {'comment': 'Great place to stay!', 'rating': 5},
+        {'comment': 'Nice place to stay!', 'rating': 4},
+        {'comment': 'Good place to stay!', 'rating': 3},
+        {'comment': 'Bad place to stay!', 'rating': 2},
+        {'comment': 'Terrible place to stay!', 'rating': 1},
+        {'comment': 'Not bad place to stay!', 'rating': 3},
+        {'comment': 'Not good place to stay!', 'rating': 2},
+        {'comment': 'The place is very clean and comfortable.', 'rating': 5},
+        {'comment': 'The place is very dirty and uncomfortable.', 'rating': 1},
+        {'comment': 'The place is very nice and cozy.', 'rating': 5},
+        {'comment': 'The place is very bad and uncomfortable.', 'rating': 1},
+        {'comment': 'The place is very clean and comfortable. I will definitely come back again.', 'rating': 5},
+        {'comment': 'The place is very dirty and uncomfortable. I will never come back again.', 'rating': 1},
+        {'comment': 'The host is very friendly and helpful.', 'rating': 5},
+        {'comment': 'I like the view from the balcony.', 'rating': 5},
+        {'comment': 'This place is very close to the city center.', 'rating': 5},
+        {'comment': 'The host is not friendly and helpful.', 'rating': 3},
+        {'comment': 'I don\'t like the view from the balcony.', 'rating': 3},
+    ]
+
+    # generate bookings
+    print('Generating bookings...')
+    bookings = []
+    total_booking_requests = 0
+    for i in tqdm(range(num_bookings)):
+        while True:
+            total_booking_requests += 1
+
+            # get a random user
+            user = random.choice(users)
+
+            # get a random homestay
+            homestay = random.choice(homestays)        
+
+            # get random services of the homestay
+            # url = homestays/<str:homestay_id>/services/
+            url = 'http://localhost:8000/api/homestays/' + homestay['id'] + '/services/'
+            response = requests.get(url, headers=headers)
+            services = [{'id': service['id']} for service in response.json()]
+            chosen_services = random.sample(services, random.randint(0, len(services)))
+
+            # random a pair of checkin_date and checkout_date as 'YYYY-MM-DD'
+            checkin_date = datetime.date(random.randint(2020, 2023), random.randint(1, 12), random.randint(1, 28))
+            checkout_date = checkin_date + datetime.timedelta(days=random.randint(1, 30))
+
+            # random review
+            review = random.choice(reviews)
+
+            # generate a booking
+            booking = {
+                'services': chosen_services,
+                'checkin_date': checkin_date.strftime('%Y-%m-%d'),
+                'checkout_date': checkout_date.strftime('%Y-%m-%d'),
+                'num_adults': random.randint(1, homestay['max_num_adults']),
+                'num_children': random.randint(0, homestay['max_num_children']),
+                'homestay': homestay['id'],
+                'user': user['id'],
+            }
+            if checkout_date < datetime.date.today():
+                booking['status'] = ['cancelled', 'completed'][random.randint(0, 1)]
+
+                if booking['status'] == 'cancelled':
+                    booking['canceled_at'] = (datetime.datetime.combine(checkout_date, datetime.time()) + timedelta(days=random.randint(1, (datetime.date.today() - checkout_date).days))).strftime('%Y-%m-%d %H:%M:%S')
+                elif booking['status'] == 'completed':
+                    review_date = datetime.datetime.combine(checkout_date, datetime.time()) + timedelta(days=random.randint(1, (datetime.date.today() - checkout_date).days))
+                    review_time = timedelta(hours=random.randint(0, 23), minutes=random.randint(0, 59), seconds=random.randint(0, 59))
+                    booking['review_timestamp'] = (review_date + review_time).strftime('%Y-%m-%d %H:%M:%S')
+                    booking['comment'] = review['comment']
+                    booking['rating'] = review['rating']
+
+            # login as the user
+            headers = login(user['username'], user['username'] + '123')
+
+            payload = json.dumps(booking)
+            # http://localhost:8000/api/bookings/<username>/
+            url = 'http://localhost:8000/api/bookings/' + user['username'] + '/'
+            response = requests.post(url, data=payload, headers=headers)
+
+            # Check the response status code for the current user
+            if response.status_code != 201:
+                continue
+            else:
+                bookings.append(booking)
+                break    
+    
+    print('Successfully generated', len(bookings), 'bookings out of', total_booking_requests, 'booking requests.')
 
 # -----------------------------
 
-cities, streets = prepare()
-manager_ids = generate_users(cities, streets, login_admin(), 200, 50)
-config_ids = generate_price_configs(login_admin(), 15)
-homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login_admin(), 120)
-service_types = generate_service_types(login_admin())
-generate_homestay_services(homestay_ids, service_types, login_admin())
+# cities, streets = prepare()
+# manager_ids = generate_users(cities, streets, login(), 200, 50)
+# config_ids = generate_price_configs(login(), 15)
+# homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login(), 120)
+# service_types = generate_service_types(login())
+# generate_homestay_services(homestay_ids, service_types, login())
+generate_bookings(login())

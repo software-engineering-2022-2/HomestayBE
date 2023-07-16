@@ -178,3 +178,19 @@ class BookingDetail(APIView):
         booking = get_object_or_404(Booking, user=user, id=booking_id)
         booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class BookedDates(APIView):
+
+    def get(self, request, homestay_id):
+        homestay = get_object_or_404(Homestay, id=homestay_id)
+        bookings = Booking.objects.filter(homestay=homestay_id)
+
+        booked_dates = []
+        for booking in bookings:
+            booked_dates.append({
+                'from': booking.checkin_date,
+                'to': booking.checkout_date
+            })
+
+        return Response(booked_dates)
