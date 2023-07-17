@@ -39,8 +39,8 @@ class Booking(models.Model):
         checkin_date_dt = datetime.datetime.strptime(str(self.checkin_date), '%Y-%m-%d')
         checkout_date_dt = datetime.datetime.strptime(str(self.checkout_date), '%Y-%m-%d')
         total_price = homestay_price*(checkout_date_dt - checkin_date_dt).days + sum(service.price for service in self.services.all())
-        if homestay_price_config.discount > 0:
-            total_price = total_price * (1 - homestay_price_config.discount)
+        # if homestay_price_config.discount > 0:
+        #     total_price = total_price * (1 - homestay_price_config.discount)
         self.total_price = total_price
         self.deposit_price = total_price * homestay_price_config.deposit_percentage
         self.save()
