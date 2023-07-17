@@ -23,8 +23,24 @@ class ListHomestays(APIView):
             homestays = Homestay.objects.all()
         
         serializer = HomestaySerializer(homestays, many=True)
-        return Response(serializer.data)
 
+        # calculate average rating for each homestay
+        data = []
+        for homestay_serialied, homestay in zip(serializer.data, homestays):
+            bookings = homestay.booking_set.all()
+            ratings = []
+            for booking in bookings:
+                if booking.rating:
+                    ratings.append(booking.rating)
+            avg_rating = None if len(ratings) == 0 else sum(ratings) / len(ratings)
+            homestay_serialied['avg_rating'] = avg_rating
+            data.append(homestay_serialied)
+        
+        # sort homestays by average rating, leave the null ratings at the end
+        data.sort(key=lambda x: x['avg_rating'] if x['avg_rating'] else -1, reverse=True)
+
+        return Response(data)
+    
     def post(self, request):
         # Only admin can create homestays
         if not request.user.is_superuser:
