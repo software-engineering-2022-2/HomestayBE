@@ -21,7 +21,10 @@ class ListHomestays(APIView):
         page = int(request.GET.get('page', '0'))
         # TODO: check page range.
 
-        if query_name:
+        query_manager = request.GET.get('manager', '').strip()
+        if query_manager:
+            homestays = Homestay.objects.filter(manager_id=query_manager)
+        elif query_name:
             homestays = Homestay.objects.filter(name__icontains=query_name)
         elif query_city:
             homestays = Homestay.objects.filter(city__icontains=query_city)
