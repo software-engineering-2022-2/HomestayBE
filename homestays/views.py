@@ -7,6 +7,9 @@ from .models import Homestay, Service
 from .serializers import HomestaySerializer, ServiceSerializer, ServiceGetSerializer, HomestayGetSerializer
 from django.db.models import Q
 from myadmin.models import ServiceType, PricingConfig
+import math
+
+PAGE_SIZE = 8
 
 
 @permission_classes([IsAuthenticatedOrReadOnly])
@@ -15,12 +18,19 @@ class ListHomestays(APIView):
     def get(self, request):
         query_name = request.GET.get('name', '').strip()
         query_city = request.GET.get('city', '').strip()
+        page = int(request.GET.get('page', '0'))
+        # TODO: check page range.
+
         if query_name:
             homestays = Homestay.objects.filter(name__icontains=query_name)
         elif query_city:
             homestays = Homestay.objects.filter(city__icontains=query_city)
         else:
             homestays = Homestay.objects.all()
+        
+        max_page =  math.ceil(len(homestays) / PAGE_SIZE) 
+        
+        homestays = homestays[PAGE_SIZE * page: PAGE_SIZE * (page + 1)]
         
         serializer = HomestaySerializer(homestays, many=True)
 
@@ -39,7 +49,7 @@ class ListHomestays(APIView):
         # sort homestays by average rating, leave the null ratings at the end
         data.sort(key=lambda x: x['avg_rating'] if x['avg_rating'] else -1, reverse=True)
 
-        return Response(data)
+        return Response({'data': data, 'max_page': max_page, 'current_page': page})
     
     def post(self, request):
         # Only admin can create homestays

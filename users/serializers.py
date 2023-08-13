@@ -11,6 +11,13 @@ class UserSerializer(ModelSerializer):
 
     def validate_password(self, value: str) -> str:
         return make_password(value)
+    
+class UserGetSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', )
+
+
 
 class UserProfileSerializer(ModelSerializer):
     class Meta:
