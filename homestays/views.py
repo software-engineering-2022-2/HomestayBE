@@ -15,7 +15,10 @@ class ListHomestays(APIView):
     def get(self, request):
         query_name = request.GET.get('name', '').strip()
         query_city = request.GET.get('city', '').strip()
-        if query_name:
+        query_manager = request.GET.get('manager', '').strip()
+        if query_manager:
+            homestays = Homestay.objects.filter(manager_id=query_manager)
+        elif query_name:
             homestays = Homestay.objects.filter(name__icontains=query_name)
         elif query_city:
             homestays = Homestay.objects.filter(city__icontains=query_city)
