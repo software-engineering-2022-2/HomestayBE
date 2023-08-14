@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.utils import timezone
 
 from django.shortcuts import get_object_or_404
@@ -7,7 +9,7 @@ from rest_framework import status
 from homestays.models import Service, Homestay
 from myadmin.models import PricingConfig
 from .models import Booking
-from .serializers import BookingSerializer
+from .serializers import BookingSerializer, HomestayBookingDataSerializer
 from users.models import User
 from django.http import HttpResponseBadRequest
 from django.db.models import Q
@@ -195,3 +197,42 @@ class BookedDates(APIView):
             })
 
         return Response(booked_dates)
+
+
+class BookingAnalytics(APIView):
+
+    def get_object(self, username):
+        return get_object_or_404(User, username=username)
+
+    def get(self, request, username):
+        # if request.user.username != username and not request.user.is_staff:
+        #     return Response(status=403)
+
+        user = self.get_object(username)
+        homestays = Homestay.objects.filter(manager_id=user.id)
+
+        booking_data = defaultdict(lambda: defaultdict(lambda: {"bookings": 0, "total_rated_bookings": 0, "total_rating": 0, "average_rating": 0.0}))
+
+        for homestay in homestays:
+            homestay_bookings = Booking.objects.filter(homestay__id=homestay.id)
+            for booking in homestay_bookings:
+                booking_month = booking.created_at.strftime('%Y-%m')
+                booking_data[homestay.id][booking_month]["bookings"] += 1
+                if booking.rating is not None:
+                    booking_data[homestay.id][booking_month]["total_rated_bookings"] += 1
+                    booking_data[homestay.id][booking_month]["total_rating"] += booking.rating
+
+        for homestay_id, months in booking_data.items():
+            for month, month_data in months.items():
+                if month_data["total_rated_bookings"] > 0:
+                    month_data["average_rating"] = month_data["total_rating"] / month_data["total_rated_bookings"]
+
+        serialized_data = []
+        for homestay_id, months in booking_data.items():
+            serialized_data.append({
+                "homestay_id": homestay_id,
+                "months": months
+            })
+
+        serializer = HomestayBookingDataSerializer(serialized_data, many=True)
+        return Response(serializer.data)
