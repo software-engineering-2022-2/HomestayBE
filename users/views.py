@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import User
-from .serializers import UserSerializer, ImageSerializer, UserProfileSerializer, UserPasswordSerializer
+from .serializers import UserGetSerializer, UserSerializer, ImageSerializer, UserProfileSerializer, UserPasswordSerializer
 from django.db.models import Q
 from django.core.files.storage import default_storage
 from cloudinary.models import CloudinaryResource
@@ -30,8 +30,8 @@ class UserList(APIView):
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query) |
             Q(email__icontains=query)
-        )
-        serializer = UserSerializer(users, many=True)
+        )[0:5]
+        serializer = UserGetSerializer(users, many=True)
         return Response(serializer.data)
 
     def post(self, request):
