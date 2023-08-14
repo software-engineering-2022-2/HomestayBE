@@ -2,12 +2,17 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Homestay, Service
-from .serializers import HomestaySerializer, ServiceSerializer, ServiceGetSerializer, HomestayGetSerializer
+from .serializers import HomestaySerializer, ServiceSerializer, ServiceGetSerializer, HomestayGetSerializer, ImageSerializer
 from django.db.models import Q
 from myadmin.models import ServiceType, PricingConfig
 import math
+from cloudinary.models import CloudinaryResource
+from cloudinary.uploader import upload, destroy
+from cloudinary.utils import cloudinary_url
+import cloudinary
+
 
 PAGE_SIZE = 8
 
@@ -126,6 +131,34 @@ class HomestayDetail(APIView):
         homestay = self.get_object(homestay_id)
         homestay.delete()
         return Response(status=204)
+
+@permission_classes([IsAuthenticated])
+class HomestayUpdateImage(APIView):
+
+    def put(self, request, homestay_id):
+        serializer = ImageSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        homestay = get_object_or_404(Homestay, id=homestay_id)
+
+        # Remove old image if it exists
+        if homestay.image:
+            public_id = homestay.image.public_id
+            destroy(public_id)
+
+        # Upload new image
+        image = serializer.validated_data.get('image')
+        upload_result = upload(image, folder='homestay-renting-website/homestays')
+        url, options = cloudinary_url(upload_result['public_id'],
+                                      format=upload_result['format'])
+        homestaySerializer = HomestaySerializer(homestay, data={"image": url}, partial=True)
+        
+        if not homestaySerializer.is_valid():
+            return Response(homestaySerializer.errors, status=400)
+        homestaySerializer.save()
+        return Response(homestaySerializer.data, status=200)
+        
 
 
 @permission_classes([IsAuthenticatedOrReadOnly])

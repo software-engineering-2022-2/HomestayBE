@@ -1,5 +1,6 @@
 from django.contrib.auth.hashers import make_password
-from rest_framework.serializers import ModelSerializer, StringRelatedField
+from rest_framework.serializers import ModelSerializer, StringRelatedField, BaseSerializer
+from rest_framework import serializers
 from .models import Homestay, Service
 from myadmin.serializers import ServiceTypeSerializer, PricingConfigSerializer
 
@@ -28,3 +29,20 @@ class ServiceGetSerializer(ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'price', 'description', 'availability', 'service_type_id', 'service_type', 'homestay_id']
+
+class ImageSerializer(BaseSerializer):
+    image = serializers.ImageField(max_length=None, allow_empty_file=False, use_url=True)
+
+    def to_internal_value(self, data):
+        img = data.get('image')
+        if not img:
+            raise serializers.ValidationError({
+                'image': 'This field is required.'
+            })
+        return {
+            'image': img
+        }
+
+    def to_representation(self, instance):
+        return {}
+    

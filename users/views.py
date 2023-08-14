@@ -46,6 +46,14 @@ class UserList(APIView):
         return Response(status=204)
 
 
+class ManagerList(APIView):
+
+    def get(self, request):
+        managers = User.objects.filter(is_staff=True)
+        serializer = UserGetSerializer(managers, many=True)
+        return Response(serializer.data)
+    
+
 @permission_classes([IsAuthenticated])
 class UserDetail(APIView):
     def get_object(self, username):
