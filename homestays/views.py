@@ -142,7 +142,7 @@ class ListServices(APIView):
     def post(self, request, homestay_id):
         if not request.user.is_staff:
             return Response(status=403, data={'detail': 'You do not have permission to create services'})
-        serializer = ServiceSerializer(data=request.data, many = True)
+        serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)
