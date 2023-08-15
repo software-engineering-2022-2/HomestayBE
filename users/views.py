@@ -49,7 +49,11 @@ class UserList(APIView):
 class ManagerList(APIView):
 
     def get(self, request):
-        managers = User.objects.filter(is_staff=True)
+        query = request.GET.get('query', '')
+        managers = User.objects.filter(
+            Q(username__icontains=query) &
+            Q(is_staff=True)
+        )[0:10]
         serializer = UserGetSerializer(managers, many=True)
         return Response(serializer.data)
     
