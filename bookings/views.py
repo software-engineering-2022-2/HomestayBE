@@ -141,7 +141,7 @@ class BookingDetail(APIView):
         if 'status' in data and booking.status != data['status']:
             print(booking.status, data['status'])
 
-            if booking.status != "Canceled" and data['status'] == "Canceled":
+            if booking.status != "Cancelled" and data['status'] == "Cancelled":
                 booking.canceled_at = timezone.now()
 
                 homestay = Homestay.objects.get(id=booking.homestay.id)
@@ -211,13 +211,21 @@ class BookingAnalytics(APIView):
         user = self.get_object(username)
         homestays = Homestay.objects.filter(manager_id=user.id)
 
-        booking_data = defaultdict(lambda: defaultdict(lambda: {"bookings": 0, "total_rated_bookings": 0, "total_rating": 0, "average_rating": 0.0}))
+        booking_data = defaultdict(lambda: defaultdict(
+            lambda: {
+                "bookings": 0,
+                "total_rated_bookings": 0,
+                "total_rating": 0,
+                "average_rating": 0.0,
+                "total_price": 0.0
+            }))
 
         for homestay in homestays:
             homestay_bookings = Booking.objects.filter(homestay__id=homestay.id)
             for booking in homestay_bookings:
                 booking_month = booking.created_at.strftime('%Y-%m')
                 booking_data[homestay.id][booking_month]["bookings"] += 1
+                booking_data[homestay.id][booking_month]["total_price"] += booking.total_price
                 if booking.rating is not None:
                     booking_data[homestay.id][booking_month]["total_rated_bookings"] += 1
                     booking_data[homestay.id][booking_month]["total_rating"] += booking.rating
@@ -231,6 +239,7 @@ class BookingAnalytics(APIView):
         for homestay_id, months in booking_data.items():
             serialized_data.append({
                 "homestay_id": homestay_id,
+                "homestay_name": Homestay.objects.get(id=homestay_id).name,
                 "months": months
             })
 

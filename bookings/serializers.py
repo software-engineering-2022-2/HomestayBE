@@ -49,9 +49,11 @@ class BookingSerializer(ModelSerializer):
 class BookingDataSerializer(serializers.Serializer):
     bookings = serializers.IntegerField()
     total_rated_bookings = serializers.IntegerField()
+    total_price = serializers.FloatField()
     average_rating = serializers.DecimalField(max_digits=5, decimal_places=2)
 
 
 class HomestayBookingDataSerializer(serializers.Serializer):
     homestay_id = serializers.UUIDField()
+    homestay_name = serializers.CharField()
     months = serializers.DictField(child=BookingDataSerializer())
