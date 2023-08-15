@@ -124,7 +124,7 @@ class BookingDetail(APIView):
 
     def put(self, request, username, booking_id):
         user = get_object_or_404(User, username=username)
-        booking = get_object_or_404(Booking, user=user, id=booking_id)
+        booking = get_object_or_404(Booking, id=booking_id)
         data = request.data
 
         # Remove the 'services' field from the data temporarily
