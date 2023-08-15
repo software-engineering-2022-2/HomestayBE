@@ -94,9 +94,11 @@ class ManagerProfile(APIView):
         manager = self.get_object(id)
         serializer = UserProfileSerializer(manager)
         data = {
+            "id": serializer.data['id'],
             "first_name": serializer.data["first_name"],
             "last_name": serializer.data["last_name"],
             "avatar": serializer.data["avatar"],
+            "username": serializer.data['username'],
             "number_of_homestays": manager.homestay_set.count()
         }
         return Response(data)
