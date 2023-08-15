@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from bookings.models import Booking
 from homestays.models import Service
+from rest_framework import serializers
 
 
 class ServiceIdSerializer(ModelSerializer):
@@ -43,3 +44,14 @@ class BookingSerializer(ModelSerializer):
         instance.services.set(Service.objects.filter(id__in=services_ids))
 
         return instance
+
+
+class BookingDataSerializer(serializers.Serializer):
+    bookings = serializers.IntegerField()
+    total_rated_bookings = serializers.IntegerField()
+    average_rating = serializers.DecimalField(max_digits=5, decimal_places=2)
+
+
+class HomestayBookingDataSerializer(serializers.Serializer):
+    homestay_id = serializers.UUIDField()
+    months = serializers.DictField(child=BookingDataSerializer())
